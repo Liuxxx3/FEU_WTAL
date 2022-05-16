@@ -24,9 +24,10 @@ def predict_img(net,
 
     with torch.no_grad():
         output = net(img)
-
+        print(output.shape)
         if net.n_classes > 1:
-            probs = F.softmax(output, dim=1)[0]
+            # probs = F.softmax(output, dim=1)[0]
+            probs = output[0]
         else:
             probs = torch.sigmoid(output)[0]
 
@@ -41,12 +42,15 @@ def predict_img(net,
     if net.n_classes == 1:
         return (full_mask > out_threshold).numpy()
     else:
-        return F.one_hot(full_mask.argmax(dim=0), net.n_classes).permute(2, 0, 1).numpy()
+        # return F.one_hot(full_mask.argmax(dim=0), net.n_classes).permute(2, 0, 1).numpy()
+        print(full_mask.shape)
+        print(full_mask)
+        return full_mask.numpy()
 
 
 def get_args():
     parser = argparse.ArgumentParser(description='Predict masks from input images')
-    parser.add_argument('--model', '-m', default='MODEL.pth', metavar='FILE',
+    parser.add_argument('--model', '-m', default='/home/syliu/SSD/unet/checkpoints/checkpoint_epoch2.pth', metavar='FILE',
                         help='Specify the file in which the model is stored')
     parser.add_argument('--input', '-i', metavar='INPUT', nargs='+', help='Filenames of input images', required=True)
     parser.add_argument('--output', '-o', metavar='OUTPUT', nargs='+', help='Filenames of output images')
@@ -75,8 +79,9 @@ def mask_to_image(mask: np.ndarray):
         return Image.fromarray((mask * 255).astype(np.uint8))
     elif mask.ndim == 3:
         # return Image.fromarray((np.argmax(mask, axis=0) * 255 / mask.shape[0]).astype(np.uint8))
-        mask = mask.transpose(2,1,0)
-        mask = mask.transpose(1,0,2)
+        # (3,112,112)
+        # print(mask)
+        mask = mask.transpose(1,2,0)
         return Image.fromarray((mask*255).astype(np.uint8))
 
 
