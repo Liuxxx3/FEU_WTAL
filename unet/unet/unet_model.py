@@ -15,7 +15,9 @@ class UNet(nn.Module):
         self.down2 = Down(64, 128)
         self.down3 = Down(128, 256)
         factor = 2 if bilinear else 1
+       
         self.down4 = Down(256, 256 // factor)
+        self.down5 = Down(128, 256)
         self.up1 = Up(256, 256 // factor, bilinear)
         self.up2 = Up(256, 128 // factor, bilinear)
         self.up3 = Up(128, 64 // factor, bilinear)
@@ -28,7 +30,7 @@ class UNet(nn.Module):
         x3 = self.down2(x2)
         x4 = self.down3(x3)
         x5 = self.down4(x4)
-
+        x6 = self.down4(x4)
         x = self.up1(x5)
         x = self.up2(x)
         x = self.up3(x)
